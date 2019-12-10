@@ -36,44 +36,48 @@ void render_function () {
 
     // Reset canvas
     glClear (GL_COLOR_BUFFER_BIT);
-    glPointSize (5.f);
+    glPointSize (10.f);
 
     // Draw stuff
     // @TODO
     
     glDrawArrays (GL_POINTS, 0, 12);
     glDrawArrays (GL_TRIANGLES, 0, 12);
+    glDrawArrays (GL_POLYGON, c_qual_offs, c_qual_size);
 
     glFlush ();
 }
 
 void program_init () {
+    // Creations
     glClearColor (1.0f, 1.0f, 1.0f, 1.0f);
     create_vbo ();
     create_shaders ();
 
+    // Points creation
     init_background_p ();
+    
+    // Normalisation matrix sending
     axis_mat = glm::translate (axis_mat, glm::vec3 (-1, 1, 0));
     axis_mat = glm::scale (axis_mat, 
         glm::vec3(2/float(X_MAX - X_MIN), -2/float(Y_MAX - Y_MIN), 2/float(Z_MAX - Z_MIN)));
     axis_mat = glm::translate (axis_mat, glm::vec3 (1,1,0));
-
     sendMat4ToShader (axis_mat, "normalisation");
 
-    for (int ind = 0; ind < 12; ind ++)
-    {
-        glm::vec3 init;
-        glm::vec4 after (init, 1.f);
-        init = getPointAtOffs (ind);
-        after = axis_mat * after;
+    // Ball
+    ball.set (vertices + 3 * c_cen_offs, BALL_RADIUS);
+    ball.draw (vertices + 3 * c_cen_offs, c_qual_size, 5);
 
-        std :: cout << ind << " -> ("
-            << init.x << " " << init.y << " " << init.z << ")\t("
-            << after.x << " " << after.y << " " << after.z << " " << after.w
-            << ")\n";
-
+    for (int ind = c_cen_offs; ind < c_cen_offs + c_cen_size + c_qual_size; ind ++) {
+        float* point = vertices + 3 * ind;
+        if ((ulong)point > (ulong)(vertices + sizeof(vertices))) {
+            std::cout<< "wtf\n";
+            continue;
+        }
+        std :: cout << point[0] << " " << point[1] << " "
+            << point[2] << "\n"; 
     }
-        
+    
 }
 
 void normal_keyb_handler (u_char key, int xx, int yy) {
@@ -81,22 +85,22 @@ void normal_keyb_handler (u_char key, int xx, int yy) {
     switch (key) {
         case '5': {
             int offset = 0;
-            movePoint (offset, 0, 10);
+            move_point (offset, 0, 10);
             break;
         }
         case '2': {
             int offset = 0;
-            movePoint (offset, 0, -10);
+            move_point (offset, 0, -10);
             break;
         }
         case '1': {
             int offset = 0;
-            movePoint (offset, -10, 0);
+            move_point (offset, -10, 0);
             break;
         }
         case '3': {
             int offset = 0;
-            movePoint (offset, 10, 0);
+            move_point (offset, 10, 0);
             break;
         }
 
@@ -108,10 +112,9 @@ void special_keyb_handler (int key, int xx, int yy) {
 }
 
 void clean_up () {
-
+    destroy_vbo ();
 }
 
-// ~~~~~~~~~~ End of main functioons ~~~~~~~~~~
 // ~~~~~~~~~ Other functions ~~~~~~~~~~~
 
 void create_vbo () {
@@ -149,39 +152,38 @@ void create_shaders () {
 
 void init_background_p () {
 
-    setPoinAtOffs (bg_o_offs + 0, 
+    set_point_at_offs (bg_o_offs + 0, 
         glm::vec3 (TABL_X_OFFS, TABL_Y_OFFS, 1));
-    setPoinAtOffs (bg_o_offs + 1, 
+    set_point_at_offs (bg_o_offs + 1, 
         glm::vec3 (TABL_X_OFFS, TABL_Y_OFFS + TABL_O_HEIGHT, 1));
-    setPoinAtOffs (bg_o_offs + 2, 
+    set_point_at_offs (bg_o_offs + 2, 
         glm::vec3 (TABL_X_OFFS + TABL_O_WIDTH, TABL_Y_OFFS + TABL_O_HEIGHT, 1));
 
-    setPoinAtOffs (bg_o_offs + 3, 
+    set_point_at_offs (bg_o_offs + 3, 
         glm::vec3 (TABL_X_OFFS, TABL_Y_OFFS, 1));
-    setPoinAtOffs (bg_o_offs + 4, 
+    set_point_at_offs (bg_o_offs + 4, 
         glm::vec3 (TABL_X_OFFS + TABL_O_WIDTH, TABL_Y_OFFS + TABL_O_HEIGHT, 1));
-    setPoinAtOffs (bg_o_offs + 5, 
+    set_point_at_offs (bg_o_offs + 5, 
         glm::vec3 (TABL_X_OFFS + TABL_O_WIDTH, TABL_Y_OFFS, 1));
     
     int xoffs = TABL_X_OFFS + TABL_MARG, yoffs = TABL_Y_OFFS + TABL_MARG;
-
-    setPoinAtOffs (bg_i_offs + 0, 
+    set_point_at_offs (bg_i_offs + 0, 
         glm::vec3 (xoffs, 
         yoffs, 2));
-    setPoinAtOffs (bg_i_offs + 1, 
+    set_point_at_offs (bg_i_offs + 1, 
         glm::vec3 (xoffs, 
         yoffs + TABL_I_HEIGHT, 2));
-    setPoinAtOffs (bg_i_offs + 2, 
+    set_point_at_offs (bg_i_offs + 2, 
         glm::vec3 (xoffs + TABL_I_WIDTH, 
         yoffs + TABL_I_HEIGHT, 2));
 
-    setPoinAtOffs (bg_i_offs + 3, 
+    set_point_at_offs (bg_i_offs + 3, 
         glm::vec3 (xoffs, 
         yoffs, 2));
-    setPoinAtOffs (bg_i_offs + 4, 
+    set_point_at_offs (bg_i_offs + 4, 
         glm::vec3 (xoffs + TABL_I_WIDTH, 
         yoffs + TABL_I_HEIGHT, 2));
-    setPoinAtOffs (bg_i_offs + 5, 
+    set_point_at_offs (bg_i_offs + 5, 
         glm::vec3 (xoffs + TABL_I_WIDTH, 
         yoffs, 2));
 }
@@ -216,7 +218,7 @@ void sendVec4ToShader (glm::vec4 vect, char* varName)
 }
 
 // ~~~~~~~~~~ Useful functions ~~~~~
-glm::vec3 getPointAtOffs (uint offset) {
+glm::vec3 get_point_at_offs (uint offset) {
     offset *= 3;
     glm::vec3 point (vertices[offset], 
         vertices[offset + 1], 
@@ -224,7 +226,7 @@ glm::vec3 getPointAtOffs (uint offset) {
     return point;
 }
 
-void setPoinAtOffs (uint offset, glm::vec3 point) {
+void set_point_at_offs (uint offset, glm::vec3 point) {
     offset *= 3;
 
     vertices[offset] = point.x;
@@ -235,7 +237,7 @@ void setPoinAtOffs (uint offset, glm::vec3 point) {
     //     << " " << point.y << " " << point.z << ")\n";
 }
 
-void movePoint (int pointOffs, int x, int y) {
+void move_point (int pointOffs, int x, int y) {
     pointOffs *= 3;
     vertices[pointOffs] += x;
     vertices[pointOffs + 1] += y;

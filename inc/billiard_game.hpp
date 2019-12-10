@@ -9,6 +9,7 @@
 #include <GL/freeglut.h> // nu trebuie uitat freeglut.h
 
 #include "myHeader.h"
+#include "Ball.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL 1
 #include <glm/glm.hpp>
@@ -44,6 +45,7 @@
 #define TABL_X_OFFS 0
 #define TABL_Y_OFFS 0
 
+#define BALL_RADIUS 17
 
 // ################# VARIABLES #################
 
@@ -52,9 +54,14 @@ GLuint VBO_ID, VAO_ID,
 
 uint bg_o_offs = 0, bg_o_size = 6,
     bg_i_offs = bg_o_offs + bg_o_size,
-    bg_i_size = 6;
+    bg_i_size = 6,
+    c_cen_offs = bg_i_offs + bg_i_size,
+    c_cen_size = 1,
+    c_qual_offs = c_cen_offs + c_cen_size,
+    c_qual_size = 12;
 
 glm::mat4 axis_mat(1.f);
+Ball ball;
 
 GLfloat vertices[] = {
     // Background far
@@ -73,6 +80,20 @@ GLfloat vertices[] = {
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
     
+    // Circle: c=1, q=12
+    500.f, 270.f, 0.f,
+
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
     0.f, 0.f, 0.f
 };
 
@@ -83,12 +104,28 @@ GLshort colors[] = {
     150, 150, 0,
     150, 150, 0,
     150, 150, 0,
+
     0, 255, 0,
     0, 255, 0,
     0, 255, 0,
     0, 255, 0,
     0, 255, 0,
-    0, 255, 0
+    0, 255, 0, 
+
+    // Ball
+    0,  0,  0,
+    255,255,255,
+    255,255,255,
+    255,255,255,
+    255,255,255,
+    255,255,255,
+    255,255,255,
+    255,255,255,
+    255,255,255,
+    255,255,255,
+    255,255,255,
+    255,255,255,
+    255,255,255
 
 };
 
@@ -101,11 +138,12 @@ void normal_keyb_handler (u_char key, int xx, int yy);
 void special_keyb_handler (int key, int xx, int yy);
 void clean_up ();
 
-// ~~~~~~~~~ Other functions ~~~~~~~~~~~
-void init_background_p ();
 void create_vbo ();
 void destroy_vbo ();
 void create_shaders ();
+
+// ~~~~~~~~~ Other functions ~~~~~~~~~~~
+void init_background_p ();
 
 // ~~~~ Fragment sending functions ~~~~~~
 void sendIntToShader (int number, char* varName);
@@ -115,9 +153,10 @@ void sendMat4ToShader (glm::mat4 matrix, char* varName);
 
 
 // ~~~~~~~~~~ Useful functions ~~~~~
-glm::vec3 getPointAtOffs (uint offset);
-void setPoinAtOffs (uint offset, glm::vec3 point);
-void movePoint (int pointOffs, int x, int y);
+glm::vec3 get_point_at_offs (uint offset);
+void set_point_at_offs (uint offset, glm::vec3 point);
+void move_point (int pointOffs, int x, int y);
+void draw_circle ();
 
 // ################ END OF FILE ################
 

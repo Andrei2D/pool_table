@@ -3,7 +3,7 @@ GL_GLUT_FLG	= -lGLU -lglut
 GL_GLEW_FLG	=-lGLEW  -lrt -lm -pthread
 GL_FLAGS 	=-I./inc -lGL $(GL_GLUT_FLG) $(GL_GLEW_FLG)
 
-SRC_NAMES 	=loadShaders billiard_game
+SRC_NAMES 	=loadShaders billiard_game Ball
 SRC 		= $(foreach dir, $(SRC_NAMES), ./src/$(dir).cpp)
 EXE 		=Billiard
 
