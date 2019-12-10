@@ -41,15 +41,8 @@ void render_function () {
     // Draw stuff
     // @TODO
     
-    glDrawArrays (GL_POINTS, 0, 1);
-    glm::vec3 init;
-    init = getPointAtOffs (0);
-    glm::vec4 after (init, 1.f);
-    after = axis_mat * after;
-
-    std :: cout << "(" << init.x << " " << init.y << " " << init.z << ")\t("
-        << after.x << " " << after.y << " " << after.z << " " << after.w
-        << ")\n";
+    glDrawArrays (GL_POINTS, 0, 12);
+    glDrawArrays (GL_TRIANGLES, 0, 12);
 
     glFlush ();
 }

@@ -20,6 +20,7 @@
 
 // Window
 #define WIND_TITLE "Billiard game"
+// 16:10 resolution
 #define WIND_WIDTH 1280
 #define WIND_HEIGHT 800
 
@@ -27,7 +28,7 @@
 #define X_MAX 1000
 #define X_MIN 0
 #define X_CEN (X_MAX + X_MIN) / 2
-#define Y_MAX 1000
+#define Y_MAX 625
 #define Y_MIN 0
 #define Y_CEN (Y_MAX + Y_MIN) / 2
 #define Z_MAX 10
@@ -35,12 +36,11 @@
 #define Z_CEN (Z_MAX + Z_MIN) / 2
 
 
-// Table
-#define TABL_I_HEIGHT 500
-#define TABL_I_WIDTH 2 * TABL_I_HEIGHT
-#define TABL_MARG (TABL_I_HEIGHT * 2) / 5
-#define TABL_O_HEIGHT 2 * TABL_MARG + TABL_I_HEIGHT
-#define TABL_O_WIDTH 2 * TABL_MARG + TABL_O_HEIGHT
+#define TABL_O_HEIGHT 500
+#define TABL_O_WIDTH 2 * TABL_O_HEIGHT
+#define TABL_MARG (TABL_O_HEIGHT / 10)
+#define TABL_I_HEIGHT TABL_O_HEIGHT - 2 * TABL_MARG
+#define TABL_I_WIDTH TABL_O_WIDTH - 2 * TABL_MARG
 #define TABL_X_OFFS 0
 #define TABL_Y_OFFS 0
 
@@ -57,33 +57,39 @@ uint bg_o_offs = 0, bg_o_size = 6,
 glm::mat4 axis_mat(1.f);
 
 GLfloat vertices[] = {
-    500.f, 500.f, 1.f,
+    // Background far
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
+    
+    // Background close
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    
     0.f, 0.f, 0.f
 };
 
 GLshort colors[] = {
-    255, 0, 0,
-    255, 0, 0,
-    255, 0, 0,
-    255, 0, 0,
-    255, 0, 0,
-    255, 0, 0,
-    
+    150, 150, 0,
+    150, 150, 0,
+    150, 150, 0,
+    150, 150, 0,
+    150, 150, 0,
+    150, 150, 0,
     0, 255, 0,
     0, 255, 0,
     0, 255, 0,
     0, 255, 0,
     0, 255, 0,
     0, 255, 0
+
 };
 
 // ################# FUNCTION ##################
