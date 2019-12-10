@@ -48,8 +48,17 @@ void program_init () {
 
     // init_background_p ();
     glm::mat4 axis_mat(1.f);
+    axis_mat = glm::scale (axis_mat, 
+        glm::vec3(1/float(X_CEN), -1/float(Y_CEN), 1/float(Z_CEN)));
     axis_mat = glm::translate (axis_mat, glm::vec3 (-X_CEN, -Y_CEN, -Z_CEN));
-    axis_mat = glm::scale (axis_mat, glm::vec3(1/X_CEN, -1/Y_CEN, 1/Z_CEN));
+    sendMat4ToShader (axis_mat, "normalisation");
+    for (int ind = 0; ind < 4; ind ++)
+    {
+        for (int j = 0; j < 4; j++)
+            std::cout << axis_mat[ind][j] << "\t";
+        std::cout << "\n";
+    }
+        
 }
 
 void normal_keyb_handler () {
@@ -125,6 +134,35 @@ void init_background_p () {
     setPoinAtOffs (bf_offs + 7, 
         glm::vec3 (xoffs + TABL_I_WIDTH, 
         yoffs, 1));
+}
+
+
+// ~~~~ Fragment sending functions ~~~~~~
+
+void sendIntToShader (int value, char* varName)
+{
+    int varLocation = glGetUniformLocation(PROG_ID, varName);
+	glUniform1i(varLocation, value);
+}
+
+void sendMat4ToShader (glm::mat4 matrix, char* varName)
+{
+    int varLocation = glGetUniformLocation (PROG_ID, varName);
+    glProgramUniformMatrix4fv (PROG_ID, varLocation, 1, 
+                                GL_FALSE, glm::value_ptr (matrix));
+}
+
+
+void sendVec3ToShader (glm::vec3 vect, char* varName)
+{
+    int varLocation = glGetUniformLocation (PROG_ID, varName);
+    glUniform3fv (varLocation, 1, glm::value_ptr (vect));
+}
+
+void sendVec4ToShader (glm::vec4 vect, char* varName)
+{
+    int varLocation = glGetUniformLocation (PROG_ID, varName);
+    glUniform4fv (varLocation, 1, glm::value_ptr (vect));
 }
 
 // ~~~~~~~~~~ Useful functions ~~~~~

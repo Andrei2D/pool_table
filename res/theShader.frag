@@ -6,8 +6,13 @@
 in vec4 ex_Color;
 out vec4 out_Color;
 
+vec4 rgb_to_ogl = ex_Color;
+
 void main(void)
-  {
-    out_Color = ex_Color;
-  }
+{
+    rgb_to_ogl.r = rgb_to_ogl.r / 255;
+    rgb_to_ogl.g = rgb_to_ogl.g / 255;
+    rgb_to_ogl.b = rgb_to_ogl.b / 255;
+    out_Color = rgb_to_ogl;
+}
  

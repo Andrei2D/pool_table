@@ -31,7 +31,7 @@
 #define Y_MIN 0
 #define Y_CEN (Y_MAX + Y_MIN) / 2
 #define Z_MAX 10
-#define Z_MIN 1
+#define Z_MIN 0
 #define Z_CEN (Z_MAX + Z_MIN) / 2
 
 
@@ -53,13 +53,21 @@ GLuint VBO_ID, VAO_ID,
 uint bf_offs = 0, bg_size = 8;
 
 GLfloat vertices[] = {
+    500.f, 500.f, 1.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f
 };
 
 GLshort colors[] = {
-    1, 0, 0,
+    255, 0, 0,
     0, 1, 0,
     0, 0, 1
 };
@@ -78,6 +86,12 @@ void init_background_p ();
 void create_vbo ();
 void destroy_vbo ();
 void create_shaders ();
+
+// ~~~~ Fragment sending functions ~~~~~~
+void sendIntToShader (int number, char* varName);
+void sendVec3ToShader (glm::vec3 vect, char* varName);
+void sendVec4ToShader (glm::vec4 vect, char* varName);
+void sendMat4ToShader (glm::mat4 matrix, char* varName);
 
 
 // ~~~~~~~~~~ Useful functions ~~~~~
