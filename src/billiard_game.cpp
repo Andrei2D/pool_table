@@ -36,12 +36,20 @@ void render_function () {
 
     // Draw stuff
     // @TODO
+    glDrawArrays (GL_POINTS, 0, 1);
 
     glFlush ();
 }
 
 void program_init () {
     glClearColor (1.0f, 1.0f, 1.0f, 1.0f);
+    create_vbo ();
+    create_shaders ();
+
+    // init_background_p ();
+    glm::mat4 axis_mat(1.f);
+    axis_mat = glm::translate (axis_mat, glm::vec3 (-X_CEN, -Y_CEN, -Z_CEN));
+    axis_mat = glm::scale (axis_mat, glm::vec3(1/X_CEN, -1/Y_CEN, 1/Z_CEN));
 }
 
 void normal_keyb_handler () {
@@ -74,7 +82,7 @@ void create_vbo () {
     glBufferData (GL_ARRAY_BUFFER, sizeof (colors), colors, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray (1);
-    glVertexAttribPointer (0, 3, GL_SHORT, GL_FALSE, 0, 0);
+    glVertexAttribPointer (1, 3, GL_SHORT, GL_FALSE, 0, 0);
 }
 
 void destroy_vbo () {
@@ -90,4 +98,48 @@ void destroy_vbo () {
 void create_shaders () {
     PROG_ID = LoadShaders("./res/theShader.vert", "./res/theShader.frag");
     glUseProgram(PROG_ID);
+}
+
+void init_background_p () {
+
+    setPoinAtOffs (bf_offs + 0, 
+        glm::vec3 (TABL_X_OFFS, TABL_Y_OFFS, 1));
+    setPoinAtOffs (bf_offs + 1, 
+        glm::vec3 (TABL_X_OFFS, TABL_Y_OFFS + TABL_O_HEIGHT, 1));
+    setPoinAtOffs (bf_offs + 2, 
+        glm::vec3 (TABL_X_OFFS + TABL_O_WIDTH, TABL_Y_OFFS + TABL_O_HEIGHT, 1));
+    setPoinAtOffs (bf_offs + 3, 
+        glm::vec3 (TABL_X_OFFS + TABL_O_WIDTH, TABL_Y_OFFS, 1));
+    
+    int xoffs = TABL_X_OFFS + TABL_MARG, yoffs = TABL_Y_OFFS + TABL_MARG;
+
+    setPoinAtOffs (bf_offs + 4, 
+        glm::vec3 (xoffs, 
+        yoffs, 1));
+    setPoinAtOffs (bf_offs + 5, 
+        glm::vec3 (xoffs, 
+        yoffs + TABL_I_HEIGHT, 1));
+    setPoinAtOffs (bf_offs + 6, 
+        glm::vec3 (xoffs + TABL_I_WIDTH, 
+        yoffs + TABL_I_HEIGHT, 1));
+    setPoinAtOffs (bf_offs + 7, 
+        glm::vec3 (xoffs + TABL_I_WIDTH, 
+        yoffs, 1));
+}
+
+// ~~~~~~~~~~ Useful functions ~~~~~
+glm::vec3 getPointAtOffs (uint offset) {
+    offset *= 3;
+    glm::vec3 point (vertices[offset], 
+        vertices[offset + 1], 
+        vertices[offset + 2]);
+    return point;
+}
+
+void setPoinAtOffs (uint offset, glm::vec3 point) {
+    offset *= 3;
+
+    vertices[offset] = point.x;
+    vertices[offset +1] = point.y;
+    vertices[offset +2] = point.z;
 }
