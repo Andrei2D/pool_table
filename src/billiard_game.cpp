@@ -17,6 +17,10 @@ int main(int argc, char** argv)
     glutDisplayFunc (render_function);
     glutIdleFunc (render_function);
 
+    // Keboard related initialisation
+    glutKeyboardFunc (normal_keyb_handler);
+    glutSpecialFunc (special_keyb_handler);
+
     //Clean up and main loop
     glutCloseFunc (clean_up);
     glutMainLoop ();
@@ -28,7 +32,7 @@ int main(int argc, char** argv)
 
 void render_function () {
     // Reload points and colors 
-    // --optional
+    create_vbo ();
 
     // Reset canvas
     glClear (GL_COLOR_BUFFER_BIT);
@@ -36,7 +40,16 @@ void render_function () {
 
     // Draw stuff
     // @TODO
+    
     glDrawArrays (GL_POINTS, 0, 1);
+    glm::vec3 init;
+    init = getPointAtOffs (0);
+    glm::vec4 after (init, 1.f);
+    after = axis_mat * after;
+
+    std :: cout << "(" << init.x << " " << init.y << " " << init.z << ")\t("
+        << after.x << " " << after.y << " " << after.z << " " << after.w
+        << ")\n";
 
     glFlush ();
 }
@@ -46,26 +59,58 @@ void program_init () {
     create_vbo ();
     create_shaders ();
 
-    // init_background_p ();
-    glm::mat4 axis_mat(1.f);
+    init_background_p ();
+    axis_mat = glm::translate (axis_mat, glm::vec3 (-1, 1, 0));
     axis_mat = glm::scale (axis_mat, 
-        glm::vec3(1/float(X_CEN), -1/float(Y_CEN), 1/float(Z_CEN)));
-    axis_mat = glm::translate (axis_mat, glm::vec3 (-X_CEN, -Y_CEN, -Z_CEN));
+        glm::vec3(2/float(X_MAX - X_MIN), -2/float(Y_MAX - Y_MIN), 2/float(Z_MAX - Z_MIN)));
+    axis_mat = glm::translate (axis_mat, glm::vec3 (1,1,0));
+
     sendMat4ToShader (axis_mat, "normalisation");
-    for (int ind = 0; ind < 4; ind ++)
+
+    for (int ind = 0; ind < 12; ind ++)
     {
-        for (int j = 0; j < 4; j++)
-            std::cout << axis_mat[ind][j] << "\t";
-        std::cout << "\n";
+        glm::vec3 init;
+        glm::vec4 after (init, 1.f);
+        init = getPointAtOffs (ind);
+        after = axis_mat * after;
+
+        std :: cout << ind << " -> ("
+            << init.x << " " << init.y << " " << init.z << ")\t("
+            << after.x << " " << after.y << " " << after.z << " " << after.w
+            << ")\n";
+
     }
         
 }
 
-void normal_keyb_handler () {
+void normal_keyb_handler (u_char key, int xx, int yy) {
     
+    switch (key) {
+        case '5': {
+            int offset = 0;
+            movePoint (offset, 0, 10);
+            break;
+        }
+        case '2': {
+            int offset = 0;
+            movePoint (offset, 0, -10);
+            break;
+        }
+        case '1': {
+            int offset = 0;
+            movePoint (offset, -10, 0);
+            break;
+        }
+        case '3': {
+            int offset = 0;
+            movePoint (offset, 10, 0);
+            break;
+        }
+
+    }
 }
 
-void special_keyb_handler () {
+void special_keyb_handler (int key, int xx, int yy) {
 
 }
 
@@ -111,29 +156,41 @@ void create_shaders () {
 
 void init_background_p () {
 
-    setPoinAtOffs (bf_offs + 0, 
+    setPoinAtOffs (bg_o_offs + 0, 
         glm::vec3 (TABL_X_OFFS, TABL_Y_OFFS, 1));
-    setPoinAtOffs (bf_offs + 1, 
+    setPoinAtOffs (bg_o_offs + 1, 
         glm::vec3 (TABL_X_OFFS, TABL_Y_OFFS + TABL_O_HEIGHT, 1));
-    setPoinAtOffs (bf_offs + 2, 
+    setPoinAtOffs (bg_o_offs + 2, 
         glm::vec3 (TABL_X_OFFS + TABL_O_WIDTH, TABL_Y_OFFS + TABL_O_HEIGHT, 1));
-    setPoinAtOffs (bf_offs + 3, 
+
+    setPoinAtOffs (bg_o_offs + 3, 
+        glm::vec3 (TABL_X_OFFS, TABL_Y_OFFS, 1));
+    setPoinAtOffs (bg_o_offs + 4, 
+        glm::vec3 (TABL_X_OFFS + TABL_O_WIDTH, TABL_Y_OFFS + TABL_O_HEIGHT, 1));
+    setPoinAtOffs (bg_o_offs + 5, 
         glm::vec3 (TABL_X_OFFS + TABL_O_WIDTH, TABL_Y_OFFS, 1));
     
     int xoffs = TABL_X_OFFS + TABL_MARG, yoffs = TABL_Y_OFFS + TABL_MARG;
 
-    setPoinAtOffs (bf_offs + 4, 
+    setPoinAtOffs (bg_i_offs + 0, 
         glm::vec3 (xoffs, 
-        yoffs, 1));
-    setPoinAtOffs (bf_offs + 5, 
+        yoffs, 2));
+    setPoinAtOffs (bg_i_offs + 1, 
         glm::vec3 (xoffs, 
-        yoffs + TABL_I_HEIGHT, 1));
-    setPoinAtOffs (bf_offs + 6, 
+        yoffs + TABL_I_HEIGHT, 2));
+    setPoinAtOffs (bg_i_offs + 2, 
         glm::vec3 (xoffs + TABL_I_WIDTH, 
-        yoffs + TABL_I_HEIGHT, 1));
-    setPoinAtOffs (bf_offs + 7, 
+        yoffs + TABL_I_HEIGHT, 2));
+
+    setPoinAtOffs (bg_i_offs + 3, 
+        glm::vec3 (xoffs, 
+        yoffs, 2));
+    setPoinAtOffs (bg_i_offs + 4, 
         glm::vec3 (xoffs + TABL_I_WIDTH, 
-        yoffs, 1));
+        yoffs + TABL_I_HEIGHT, 2));
+    setPoinAtOffs (bg_i_offs + 5, 
+        glm::vec3 (xoffs + TABL_I_WIDTH, 
+        yoffs, 2));
 }
 
 
@@ -180,4 +237,13 @@ void setPoinAtOffs (uint offset, glm::vec3 point) {
     vertices[offset] = point.x;
     vertices[offset +1] = point.y;
     vertices[offset +2] = point.z;
+
+    // std :: cout << offset/3 << "\t (" << point.x 
+    //     << " " << point.y << " " << point.z << ")\n";
+}
+
+void movePoint (int pointOffs, int x, int y) {
+    pointOffs *= 3;
+    vertices[pointOffs] += x;
+    vertices[pointOffs + 1] += y;
 }

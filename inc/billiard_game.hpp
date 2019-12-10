@@ -50,7 +50,11 @@
 GLuint VBO_ID, VAO_ID,
     COL_BUF_ID, PROG_ID;
 
-uint bf_offs = 0, bg_size = 8;
+uint bg_o_offs = 0, bg_o_size = 6,
+    bg_i_offs = bg_o_offs + bg_o_size,
+    bg_i_size = 6;
+
+glm::mat4 axis_mat(1.f);
 
 GLfloat vertices[] = {
     500.f, 500.f, 1.f,
@@ -68,8 +72,18 @@ GLfloat vertices[] = {
 
 GLshort colors[] = {
     255, 0, 0,
-    0, 1, 0,
-    0, 0, 1
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    
+    0, 255, 0,
+    0, 255, 0,
+    0, 255, 0,
+    0, 255, 0,
+    0, 255, 0,
+    0, 255, 0
 };
 
 // ################# FUNCTION ##################
@@ -77,8 +91,8 @@ GLshort colors[] = {
 // ~~~~~~~~~~ Main functioons ~~~~~~~~~~
 void program_init ();
 void render_function ();
-void normal_keyb_handler ();
-void special_keyb_handler ();
+void normal_keyb_handler (u_char key, int xx, int yy);
+void special_keyb_handler (int key, int xx, int yy);
 void clean_up ();
 
 // ~~~~~~~~~ Other functions ~~~~~~~~~~~
@@ -97,6 +111,7 @@ void sendMat4ToShader (glm::mat4 matrix, char* varName);
 // ~~~~~~~~~~ Useful functions ~~~~~
 glm::vec3 getPointAtOffs (uint offset);
 void setPoinAtOffs (uint offset, glm::vec3 point);
+void movePoint (int pointOffs, int x, int y);
 
 // ################ END OF FILE ################
 
