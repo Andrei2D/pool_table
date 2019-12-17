@@ -1,5 +1,11 @@
 #include "billiard_game.hpp"
 
+auto out_vert = [](int offset) {
+    float* point = vertices + 3 * offset;
+    std :: cout << "(" << point[0] << " " << point[1] << " "
+            << point[2] << ")\n";
+};
+
 int main(int argc, char** argv)
 {
     // Glut init function
@@ -43,6 +49,8 @@ void render_function () {
     
     glDrawArrays (GL_POINTS, 0, 12);
     glDrawArrays (GL_TRIANGLES, 0, 12);
+
+    // out_vert(c_cen_offs);
     glDrawArrays (GL_POLYGON, c_qual_offs, c_qual_size);
 
     glFlush ();
@@ -64,19 +72,17 @@ void program_init () {
     axis_mat = glm::translate (axis_mat, glm::vec3 (1,1,0));
     sendMat4ToShader (axis_mat, "normalisation");
 
-    // Ball
-    ball.set (vertices + 3 * c_cen_offs, BALL_RADIUS);
-    ball.draw (vertices + 3 * c_cen_offs, c_qual_size, 5);
+    // for (int ind = c_cen_offs; ind < c_cen_offs + c_cen_size + c_qual_size; ind ++) {
+    //     float* point = vertices + 3 * ind;
+    //     std :: cout << point[0] << " " << point[1] << " "
+    //         << point[2] << "\n"; 
+    // }
 
-    for (int ind = c_cen_offs; ind < c_cen_offs + c_cen_size + c_qual_size; ind ++) {
-        float* point = vertices + 3 * ind;
-        if ((ulong)point > (ulong)(vertices + sizeof(vertices))) {
-            std::cout<< "wtf\n";
-            continue;
-        }
-        std :: cout << point[0] << " " << point[1] << " "
-            << point[2] << "\n"; 
-    }
+    // Timer
+    update_clock = std::clock ();
+
+    // Update thread
+    pthread_create (&ball_th, NULL, ball_update_th, NULL);
     
 }
 
@@ -103,12 +109,30 @@ void normal_keyb_handler (u_char key, int xx, int yy) {
             move_point (offset, 10, 0);
             break;
         }
-
+        case '.': {
+            pthread_mutex_lock (&ball_mtx);
+            ball.act_on (2.5);
+            pthread_mutex_unlock (&ball_mtx);
+            break;
+        }
+        case '7': {
+            pthread_mutex_lock (&ball_mtx);
+            ball.rotate_ccw ();
+            std :: cout << (ball.alfa / (2 * PI)) * 360 << "\n" << std::flush;
+            pthread_mutex_unlock (&ball_mtx);
+            break;
+        }
+        case '9': {
+            pthread_mutex_lock (&ball_mtx);
+            ball.rotate_cw ();
+            std :: cout << (ball.alfa / (2 * PI)) * 360 << "\n" << std::flush;
+            pthread_mutex_unlock (&ball_mtx);
+            break;
+        }
     }
 }
 
 void special_keyb_handler (int key, int xx, int yy) {
-
 }
 
 void clean_up () {
@@ -241,4 +265,39 @@ void move_point (int pointOffs, int x, int y) {
     pointOffs *= 3;
     vertices[pointOffs] += x;
     vertices[pointOffs + 1] += y;
+}
+
+
+bool timer (clock_t& last_clock, uint durr_msec) {
+    clock_t curr_clk = std::clock ();
+    uint time_passed = (curr_clk - last_clock) / float(CLOCKS_PER_SEC);
+    time_passed *= 1000;
+
+    // Passed more that it should have waited
+    if (time_passed >= durr_msec) {
+        last_clock = curr_clk;
+        return true;
+    }
+    return false;
+}
+
+void* ball_update_th(void* nothing) {
+
+    // Ball
+    ball.set (vertices + 3 * c_cen_offs, BALL_RADIUS);
+    ball.draw (vertices + 3 * c_cen_offs, c_qual_size, 5);
+    glm::vec3 board_top = get_point_at_offs (bg_i_offs);
+    glm::vec3 board_bot = board_top;
+    board_bot.x += TABL_I_WIDTH;
+    board_bot.y += TABL_I_HEIGHT;
+    ball.set_limits (board_top.x, board_top.y, board_bot.x, board_bot.y);
+
+    while (true) {
+        usleep (Ball::update_rate_ms * 1000);
+        pthread_mutex_lock (&ball_mtx);
+        ball.update ();
+        ball.draw (vertices + 3 * c_cen_offs, c_qual_size, 5);
+        pthread_mutex_unlock (&ball_mtx);
+    }
+
 }

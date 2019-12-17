@@ -3,6 +3,9 @@
 
 #include <stdlib.h> // necesare pentru citirea shader-elor
 #include <stdio.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <ctime>
 #include <math.h>
 #include <iostream>
 #include <GL/glew.h> // glew apare inainte de freeglut
@@ -46,11 +49,16 @@
 #define TABL_Y_OFFS 0
 
 #define BALL_RADIUS 17
+#define DELT_T 1/121.f
+#define DT_MS uint(DELT_T * 1000)
 
 // ################# VARIABLES #################
 
 GLuint VBO_ID, VAO_ID,
     COL_BUF_ID, PROG_ID;
+
+pthread_t ball_th;
+pthread_mutex_t ball_mtx = PTHREAD_MUTEX_INITIALIZER;
 
 uint bg_o_offs = 0, bg_o_size = 6,
     bg_i_offs = bg_o_offs + bg_o_size,
@@ -60,6 +68,7 @@ uint bg_o_offs = 0, bg_o_size = 6,
     c_qual_offs = c_cen_offs + c_cen_size,
     c_qual_size = 12;
 
+clock_t update_clock;
 glm::mat4 axis_mat(1.f);
 Ball ball;
 
@@ -157,7 +166,8 @@ glm::vec3 get_point_at_offs (uint offset);
 void set_point_at_offs (uint offset, glm::vec3 point);
 void move_point (int pointOffs, int x, int y);
 void draw_circle ();
-
+bool timer (clock_t& last_clock, uint durr_msec); 
+void* ball_update_th(void* nothing);
 // ################ END OF FILE ################
 
 #endif /** BILLIARD_GAME_HPP_*/

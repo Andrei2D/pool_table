@@ -13,3 +13,7 @@ build:
 	g++ $(SRC) -o $(EXE) $(GL_FLAGS)
 run: build
 	./$(EXE)
+
+test:
+	g++ simulate.cpp
+	./a.out
