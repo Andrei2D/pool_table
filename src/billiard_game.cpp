@@ -44,10 +44,7 @@ void render_function () {
     glClear (GL_COLOR_BUFFER_BIT);
     glPointSize (10.f);
 
-    // Draw stuff
-    // @TODO
-    sendIntToShader (0, "trigOrNah");
-
+    // Get ball data
     pthread_mutex_lock (&ball_mtx);
     Ball localBall = ball;
     pthread_mutex_unlock (&ball_mtx);
@@ -59,28 +56,10 @@ void render_function () {
     glDrawArrays (GL_POINTS, 0, 12);
     glDrawArrays (GL_TRIANGLES, 0, 12);
 
-    // Pointing triangle
+    // Minge
     b4Norm = glm::translate (b4Norm, glm::vec3(localBall.x, localBall.y, 0));
-
     sendMat4ToShader (b4Norm, "farRight");
     glDrawArrays (GL_POLYGON, c_qual_offs, c_qual_size);
-
-    
-    sendIntToShader (1, "trigOrNah");
-    
-    glm::vec4 rad_move(-1.5 * BALL_RADIUS, 0, 0, 1), 
-        to_ball_move(localBall.x, localBall.y, 0, 1);
-    rad_move = axis_mat * rad_move;
-    to_ball_move = axis_mat * to_ball_move;
-    
-    b4Norm = glm::mat4(1.f);
-    aftNorm = glm::translate (glm::mat4(1.f), glm::vec3(rad_move));
-    aftNorm = glm::rotate (float(ball.alfa), glm::vec3(0, 0, 1)) * aftNorm;
-    // aftNorm = glm::translate (aftNorm, glm::vec3(to_ball_move));
-
-    sendMat4ToShader (aftNorm, "farLeft");
-    sendMat4ToShader (b4Norm, "farRight");
-    glDrawArrays (GL_TRIANGLES, tr_or_offs, tr_or_size);
 
     glFlush ();
 }
@@ -102,12 +81,6 @@ void program_init () {
     axis_mat = glm::translate (axis_mat, glm::vec3 (1,1,0));
     sendMat4ToShader (axis_mat, "normalisation");
 
-    // for (int ind = c_cen_offs; ind < c_cen_offs + c_cen_size + c_qual_size; ind ++) {
-    //     float* point = vertices + 3 * ind;
-    //     std :: cout << point[0] << " " << point[1] << " "
-    //         << point[2] << "\n"; 
-    // }
-
     // Timer
     update_clock = std::clock ();
 
@@ -119,26 +92,6 @@ void program_init () {
 void normal_keyb_handler (u_char key, int xx, int yy) {
     
     switch (key) {
-        case '5': {
-            int offset = 0;
-            move_point (offset, 0, 10);
-            break;
-        }
-        case '2': {
-            int offset = 0;
-            move_point (offset, 0, -10);
-            break;
-        }
-        case '1': {
-            int offset = 0;
-            move_point (offset, -10, 0);
-            break;
-        }
-        case '3': {
-            int offset = 0;
-            move_point (offset, 10, 0);
-            break;
-        }
         case '.': {
             pthread_mutex_lock (&ball_mtx);
             ball.act_on (2.5);
