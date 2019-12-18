@@ -29,8 +29,8 @@ struct Ball {
     static float rot_angle;
     static float fric_force;
 
-    float* x; 
-    float* y;
+    float x; 
+    float y;
     float radius;
     double alfa;
     float dist, veloc, acc;
@@ -38,7 +38,7 @@ struct Ball {
     int lim_x_bot, lim_y_bot;
 
     Ball ();
-    void set (float* mem_beginn, float radius);
+    void set (int init_x, int init_y, float radius) ;
     void set_limits (int x_t, int y_t, int x_b, int y_b);
     void check_limits ();
     void update ();

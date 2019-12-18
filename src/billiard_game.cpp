@@ -46,11 +46,18 @@ void render_function () {
 
     // Draw stuff
     // @TODO
+    glm::mat4 b4Mat(1.f), aftMat(1.f);
+    sendMat4ToShader (b4Mat, "farLeft");
+    sendMat4ToShader (aftMat, "farRight");
     
     glDrawArrays (GL_POINTS, 0, 12);
     glDrawArrays (GL_TRIANGLES, 0, 12);
 
-    // out_vert(c_cen_offs);
+    pthread_mutex_lock (&ball_mtx);
+    aftMat = glm::translate (aftMat, glm::vec3(ball.x, ball.y, 0));
+    pthread_mutex_unlock (&ball_mtx);
+
+    sendMat4ToShader (aftMat, "farRight");
     glDrawArrays (GL_POLYGON, c_qual_offs, c_qual_size);
 
     glFlush ();
@@ -64,6 +71,7 @@ void program_init () {
 
     // Points creation
     init_background_p ();
+    init_circle (c_cen_offs, c_qual_size, BALL_RADIUS);
     
     // Normalisation matrix sending
     axis_mat = glm::translate (axis_mat, glm::vec3 (-1, 1, 0));
@@ -212,6 +220,24 @@ void init_background_p () {
         yoffs, 2));
 }
 
+void init_circle (int offset, int quality, float radius) {
+
+    double measure = (2*PI) / quality, angle = 0;
+    float* vertex = vertices + (3 * offset);
+    vertex[0] = 0;
+    vertex[1] = 0;
+    vertex[2] = Z_FG;
+    vertex += 3;
+    
+    for (int ind = 0; ind < quality; ind ++) {
+        vertex[0] = cos (angle) * radius;
+        vertex[1] = sin (angle) * radius;
+        vertex[2] = Z_FG;
+
+        vertex += 3;
+        angle += measure;
+    }
+}
 
 // ~~~~ Fragment sending functions ~~~~~~
 
@@ -284,19 +310,18 @@ bool timer (clock_t& last_clock, uint durr_msec) {
 void* ball_update_th(void* nothing) {
 
     // Ball
-    ball.set (vertices + 3 * c_cen_offs, BALL_RADIUS);
-    ball.draw (vertices + 3 * c_cen_offs, c_qual_size, 5);
     glm::vec3 board_top = get_point_at_offs (bg_i_offs);
     glm::vec3 board_bot = board_top;
     board_bot.x += TABL_I_WIDTH;
     board_bot.y += TABL_I_HEIGHT;
+    ball.set ((board_top.x + board_bot.x) / 2, 
+            (board_top.y + board_bot.y) / 2, BALL_RADIUS);
     ball.set_limits (board_top.x, board_top.y, board_bot.x, board_bot.y);
 
     while (true) {
         usleep (Ball::update_rate_ms * 1000);
         pthread_mutex_lock (&ball_mtx);
         ball.update ();
-        ball.draw (vertices + 3 * c_cen_offs, c_qual_size, 5);
         pthread_mutex_unlock (&ball_mtx);
     }
 

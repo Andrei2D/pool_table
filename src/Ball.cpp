@@ -5,17 +5,17 @@ float Ball::rot_angle = PI / 6;
 float Ball::fric_force = 0.1f;
 
 Ball::Ball () {
-    x = NULL;
-    y = NULL;
+    x = 0;
+    y = 0;
     radius = 0;
     alfa = 0;
     dist = veloc = acc = 0;
     lim_x_top = lim_y_top = lim_x_bot = lim_y_bot = 0;
 }
 
-void Ball::set (float* mem_beginn, float radius) {
-    x = mem_beginn;
-    y = mem_beginn  + 1;
+void Ball::set (int init_x, int init_y, float radius) {
+    x = init_x;
+    y = init_y;
     this->radius = radius;
 }
 
@@ -27,10 +27,10 @@ void Ball::set_limits (int x_t, int y_t, int x_b, int y_b) {
 }
 
 void Ball::check_limits () {
-    if (*x - radius <= lim_x_top || *x + radius >= lim_x_bot) 
+    if (x - radius <= lim_x_top || x + radius >= lim_x_bot) 
         angl_Y_shift();
     
-    if (*y - radius <= lim_y_top || *y + radius >= lim_y_bot) 
+    if (y - radius <= lim_y_top || y + radius >= lim_y_bot) 
         angl_X_shift();
 }
 
@@ -49,12 +49,12 @@ void Ball::update () {
 }
 
 void Ball::move () {
-    float calc_x = *x + sin (alfa) * dist;
-    float calc_y = *y - cos (alfa) * dist;
-    *x = (calc_x - radius <= lim_x_top ? lim_x_top + radius:
+    float calc_x = x + sin (alfa) * dist;
+    float calc_y = y - cos (alfa) * dist;
+    x = (calc_x - radius <= lim_x_top ? lim_x_top + radius:
         calc_x + radius >= lim_x_bot ? lim_x_bot - radius:
         calc_x);
-    *y = (calc_y - radius <= lim_y_top ? lim_y_top + radius:
+    y = (calc_y - radius <= lim_y_top ? lim_y_top + radius:
         calc_y + radius >= lim_y_bot ? lim_y_bot - radius:
         calc_y);
     dist = 0;
@@ -63,14 +63,14 @@ void Ball::move () {
 void Ball::draw (GLfloat* vertex, int quality, float z_elm) {
     double measure = (2*PI) / quality, angle = 0;
     float old_val[3];
-    vertex[0] = *x;
-    vertex[1] = *y;
+    vertex[0] = x;
+    vertex[1] = y;
     vertex[2] = z_elm;
     vertex += 3;
     
     for (int ind = 0; ind < quality; ind ++) {
-        vertex[0] = *x + cos (angle) * radius;
-        vertex[1] = *y + sin (angle) * radius;
+        vertex[0] = x + cos (angle) * radius;
+        vertex[1] = y + sin (angle) * radius;
         vertex[2] = z_elm;
 
         vertex += 3;

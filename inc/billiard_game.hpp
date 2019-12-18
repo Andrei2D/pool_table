@@ -39,6 +39,7 @@
 #define Z_MIN 0
 #define Z_CEN (Z_MAX + Z_MIN) / 2
 
+#define Z_FG 2
 
 #define TABL_O_HEIGHT 500
 #define TABL_O_WIDTH 2 * TABL_O_HEIGHT
@@ -47,6 +48,8 @@
 #define TABL_I_WIDTH TABL_O_WIDTH - 2 * TABL_MARG
 #define TABL_X_OFFS 0
 #define TABL_Y_OFFS 0
+#define TABL_X_CEN TABL_MARG + (TABL_I_WIDTH / 2)
+#define TABL_Y_CEN TABL_MARG + (TABL_I_HEIGHT / 2)
 
 #define BALL_RADIUS 17
 #define DELT_T 1/121.f
@@ -66,7 +69,9 @@ uint bg_o_offs = 0, bg_o_size = 6,
     c_cen_offs = bg_i_offs + bg_i_size,
     c_cen_size = 1,
     c_qual_offs = c_cen_offs + c_cen_size,
-    c_qual_size = 12;
+    c_qual_size = 12,
+    pt_test_offs = c_qual_offs + c_qual_size,
+    pt_test_size = 1;
 
 clock_t update_clock;
 glm::mat4 axis_mat(1.f);
@@ -90,7 +95,7 @@ GLfloat vertices[] = {
     0.f, 0.f, 0.f,
     
     // Circle: c=1, q=12
-    500.f, 270.f, 0.f,
+    0.f, 0.f, 0.f,
 
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
@@ -103,6 +108,9 @@ GLfloat vertices[] = {
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
+    0.f, 0.f, 0.f,
+
+    // Rest of points
     0.f, 0.f, 0.f
 };
 
@@ -134,7 +142,8 @@ GLshort colors[] = {
     255,255,255,
     255,255,255,
     255,255,255,
-    255,255,255
+    255,255,255,
+    0,0,255
 
 };
 
@@ -165,7 +174,7 @@ void sendMat4ToShader (glm::mat4 matrix, char* varName);
 glm::vec3 get_point_at_offs (uint offset);
 void set_point_at_offs (uint offset, glm::vec3 point);
 void move_point (int pointOffs, int x, int y);
-void draw_circle ();
+void init_circle (int offset, int quality, float radius);
 bool timer (clock_t& last_clock, uint durr_msec); 
 void* ball_update_th(void* nothing);
 // ################ END OF FILE ################

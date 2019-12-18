@@ -9,10 +9,11 @@ out vec4 gl_Position;
 out vec4 ex_Color;
  
 uniform mat4 normalisation;
+uniform mat4 farLeft, farRight;
 
 void main(void)
 {
-    gl_Position = normalisation * in_Position;
+    gl_Position = farLeft * normalisation * farRight * in_Position;
     ex_Color = in_Color;
 } 
  
