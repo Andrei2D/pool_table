@@ -6,13 +6,22 @@
 in vec4 ex_Color;
 out vec4 out_Color;
 
-vec4 rgb_to_ogl = ex_Color;
+uniform int my_color;
+uniform vec3 custom_color;
 
 void main(void)
 {
-    rgb_to_ogl.r = rgb_to_ogl.r / 255;
-    rgb_to_ogl.g = rgb_to_ogl.g / 255;
-    rgb_to_ogl.b = rgb_to_ogl.b / 255;
-    out_Color = rgb_to_ogl;
+
+    if (my_color == 1) {
+    out_Color.r = custom_color.r / 255;
+    out_Color.g = custom_color.g / 255;
+    out_Color.b = custom_color.b / 255;
+
+    }
+    else {   
+    out_Color.r = ex_Color.r / 255;
+    out_Color.g = ex_Color.g / 255;
+    out_Color.b = ex_Color.b / 255;
+    }
 }
  

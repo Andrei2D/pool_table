@@ -75,7 +75,10 @@ uint bg_o_offs = 0, bg_o_size = 6,
 
 clock_t update_clock;
 glm::mat4 axis_mat(1.f);
-Ball ball;
+glm::vec3 blue_color(0,0,255), white_color(255,255,255),
+    yellow_color(255,255,0);
+int curr_ball = 0, nr_of_balls = 2;
+Ball ball[2];
 
 GLfloat vertices[] = {
     // Background far
@@ -179,6 +182,7 @@ void sendMat4ToShader (glm::mat4 matrix, char* varName);
 // ~~~~~~~~~~ Useful functions ~~~~~
 glm::vec3 get_point_at_offs (uint offset);
 void set_point_at_offs (uint offset, glm::vec3 point);
+void set_color_at_offs (uint offset, glm::vec3 color);
 void move_point (int pointOffs, int x, int y);
 void init_circle (int offset, int quality, float radius);
 bool timer (clock_t& last_clock, uint durr_msec); 

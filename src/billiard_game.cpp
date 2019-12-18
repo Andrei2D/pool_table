@@ -46,20 +46,38 @@ void render_function () {
 
     // Get ball data
     pthread_mutex_lock (&ball_mtx);
-    Ball localBall = ball;
+    Ball localBall[2];
+    localBall[0] = ball[0];
+    localBall[1] = ball[1];
     pthread_mutex_unlock (&ball_mtx);
-    glm::mat4 aftNorm(1.f), b4Norm(1.f), inv_axis;
 
+    glm::mat4 aftNorm(1.f), b4Norm(1.f);
+    sendIntToShader (0, "my_color");
+    sendVec3ToShader (white_color, "custom_color");
+
+    // Draw background
     sendMat4ToShader (aftNorm, "farLeft");
     sendMat4ToShader (b4Norm, "farRight");
-    
     glDrawArrays (GL_POINTS, 0, 12);
     glDrawArrays (GL_TRIANGLES, 0, 12);
 
-    // Minge
-    b4Norm = glm::translate (b4Norm, glm::vec3(localBall.x, localBall.y, 0));
-    sendMat4ToShader (b4Norm, "farRight");
-    glDrawArrays (GL_POLYGON, c_qual_offs, c_qual_size);
+
+    for (int ind = 0; ind < nr_of_balls; ind ++) {
+        // Set balls colors
+        sendIntToShader (1, "my_color");
+        if (ind == curr_ball) {
+            sendVec3ToShader (blue_color, "custom_color");
+        }
+        else {
+            sendVec3ToShader (yellow_color, "custom_color");
+        }
+
+        // Balls
+        b4Norm = glm::translate (glm::mat4(1.f), 
+            glm::vec3(localBall[ind].x, localBall[ind].y, 0));
+        sendMat4ToShader (b4Norm, "farRight");
+        glDrawArrays (GL_POLYGON, c_qual_offs, c_qual_size);
+    }
 
     glFlush ();
 }
@@ -92,23 +110,29 @@ void program_init () {
 void normal_keyb_handler (u_char key, int xx, int yy) {
     
     switch (key) {
-        case '.': {
+        case '0': {
             pthread_mutex_lock (&ball_mtx);
-            ball.act_on (2.5);
+            ball[curr_ball].act_on (2.5);
             pthread_mutex_unlock (&ball_mtx);
+            break;
+        }
+        case '.': {
+            curr_ball = (curr_ball + 1) % 2; 
             break;
         }
         case '7': {
             pthread_mutex_lock (&ball_mtx);
-            ball.rotate_ccw ();
-            std :: cout << (ball.alfa / (2 * PI)) * 360 << "\n" << std::flush;
+            ball[curr_ball].rotate_ccw ();
+            std :: cout << (ball[0].alfa / (2 * PI)) * 360 << "\t" << std::flush;
+            std :: cout << (ball[1].alfa / (2 * PI)) * 360 << "\n" << std::flush;
             pthread_mutex_unlock (&ball_mtx);
             break;
         }
         case '9': {
             pthread_mutex_lock (&ball_mtx);
-            ball.rotate_cw ();
-            std :: cout << (ball.alfa / (2 * PI)) * 360 << "\n" << std::flush;
+            ball[curr_ball].rotate_cw ();
+            std :: cout << (ball[0].alfa / (2 * PI)) * 360 << "\t" << std::flush;
+            std :: cout << (ball[1].alfa / (2 * PI)) * 360 << "\n" << std::flush;
             pthread_mutex_unlock (&ball_mtx);
             break;
         }
@@ -257,9 +281,15 @@ void set_point_at_offs (uint offset, glm::vec3 point) {
     vertices[offset] = point.x;
     vertices[offset +1] = point.y;
     vertices[offset +2] = point.z;
+}
 
-    // std :: cout << offset/3 << "\t (" << point.x 
-    //     << " " << point.y << " " << point.z << ")\n";
+
+void set_color_at_offs (uint offset, glm::vec3 color) {
+    offset *= 3;
+
+    colors[offset +0] = color.x;
+    colors[offset +1] = color.y;
+    colors[offset +2] = color.z;
 }
 
 void move_point (int pointOffs, int x, int y) {
@@ -287,16 +317,23 @@ void* ball_update_th(void* nothing) {
     // Ball
     glm::vec3 board_top = get_point_at_offs (bg_i_offs);
     glm::vec3 board_bot = board_top;
+
     board_bot.x += TABL_I_WIDTH;
     board_bot.y += TABL_I_HEIGHT;
-    ball.set ((board_top.x + board_bot.x) / 2, 
-            (board_top.y + board_bot.y) / 2, BALL_RADIUS);
-    ball.set_limits (board_top.x, board_top.y, board_bot.x, board_bot.y);
+    
+    glm::vec3 board_mid ((board_top.x + board_bot.x) / 2, 
+        (board_top.y + board_bot.y) / 2, Z_FG);
+    
+    ball[0].set (board_mid.x,board_mid.y, BALL_RADIUS);
+    ball[1].set (board_mid.x, board_mid.y, BALL_RADIUS);
+    ball[0].set_limits (board_top.x, board_top.y, board_bot.x, board_bot.y);
+    ball[1].set_limits (board_top.x, board_top.y, board_bot.x, board_bot.y);
 
     while (true) {
         usleep (Ball::update_rate_ms * 1000);
         pthread_mutex_lock (&ball_mtx);
-        ball.update ();
+        ball[0].update ();
+        ball[1].update ();
         pthread_mutex_unlock (&ball_mtx);
     }
 
