@@ -46,19 +46,41 @@ void render_function () {
 
     // Draw stuff
     // @TODO
-    glm::mat4 b4Mat(1.f), aftMat(1.f);
-    sendMat4ToShader (b4Mat, "farLeft");
-    sendMat4ToShader (aftMat, "farRight");
+    sendIntToShader (0, "trigOrNah");
+
+    pthread_mutex_lock (&ball_mtx);
+    Ball localBall = ball;
+    pthread_mutex_unlock (&ball_mtx);
+    glm::mat4 aftNorm(1.f), b4Norm(1.f), inv_axis;
+
+    sendMat4ToShader (aftNorm, "farLeft");
+    sendMat4ToShader (b4Norm, "farRight");
     
     glDrawArrays (GL_POINTS, 0, 12);
     glDrawArrays (GL_TRIANGLES, 0, 12);
 
-    pthread_mutex_lock (&ball_mtx);
-    aftMat = glm::translate (aftMat, glm::vec3(ball.x, ball.y, 0));
-    pthread_mutex_unlock (&ball_mtx);
+    // Pointing triangle
+    b4Norm = glm::translate (b4Norm, glm::vec3(localBall.x, localBall.y, 0));
 
-    sendMat4ToShader (aftMat, "farRight");
+    sendMat4ToShader (b4Norm, "farRight");
     glDrawArrays (GL_POLYGON, c_qual_offs, c_qual_size);
+
+    
+    sendIntToShader (1, "trigOrNah");
+    
+    glm::vec4 rad_move(-1.5 * BALL_RADIUS, 0, 0, 1), 
+        to_ball_move(localBall.x, localBall.y, 0, 1);
+    rad_move = axis_mat * rad_move;
+    to_ball_move = axis_mat * to_ball_move;
+    
+    b4Norm = glm::mat4(1.f);
+    aftNorm = glm::translate (glm::mat4(1.f), glm::vec3(rad_move));
+    aftNorm = glm::rotate (float(ball.alfa), glm::vec3(0, 0, 1)) * aftNorm;
+    // aftNorm = glm::translate (aftNorm, glm::vec3(to_ball_move));
+
+    sendMat4ToShader (aftNorm, "farLeft");
+    sendMat4ToShader (b4Norm, "farRight");
+    glDrawArrays (GL_TRIANGLES, tr_or_offs, tr_or_size);
 
     glFlush ();
 }

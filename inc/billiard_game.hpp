@@ -70,8 +70,8 @@ uint bg_o_offs = 0, bg_o_size = 6,
     c_cen_size = 1,
     c_qual_offs = c_cen_offs + c_cen_size,
     c_qual_size = 12,
-    pt_test_offs = c_qual_offs + c_qual_size,
-    pt_test_size = 1;
+    tr_or_offs = c_qual_offs + c_qual_size,
+    tr_or_size = 3;
 
 clock_t update_clock;
 glm::mat4 axis_mat(1.f);
@@ -110,8 +110,10 @@ GLfloat vertices[] = {
     0.f, 0.f, 0.f,
     0.f, 0.f, 0.f,
 
-    // Rest of points
-    0.f, 0.f, 0.f
+    // Orientation triangle
+     0.f, -20.f,2.f,
+    -5.f, 15.f, 2.f,
+     5.f, 15.f, 3.f
 };
 
 GLshort colors[] = {
@@ -143,6 +145,10 @@ GLshort colors[] = {
     255,255,255,
     255,255,255,
     255,255,255,
+
+    // Orientation triangle 
+    0,0,255,
+    0,0,255,
     0,0,255
 
 };
